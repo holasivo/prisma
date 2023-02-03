@@ -1,21 +1,22 @@
-export type ValidationError =
-  | {
-      kind: 'includeAndSelect'
-      selectionPath: string[]
-    }
-  | {
-      kind: 'includeOnScalar'
-      selectionPath: string[]
-      meta: {
-        outputType: OutputTypeDescription
-      }
-    }
+export type IncludeAndSelectError = {
+  kind: 'includeAndSelect'
+  selectionPath: string[]
+}
+
+export type IncludeOnScalarError = {
+  kind: 'includeOnScalar'
+  selectionPath: string[]
+  meta: {
+    outputType?: OutputTypeDescription
+  }
+}
+export type ValidationError = IncludeAndSelectError | IncludeOnScalarError
 
 // TODO: engine-side validation errors
 
 export type OutputTypeDescription = {
   name: string
-  fields?: OutputTypeDescriptionField[]
+  fields: OutputTypeDescriptionField[]
 }
 
 type OutputTypeDescriptionField = {
