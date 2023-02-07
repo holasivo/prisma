@@ -5,6 +5,7 @@ import { Writer } from '../../../generation/ts-builders/Writer'
 import { objectEnumValues } from '../../object-enums'
 import { FieldRefImpl } from '../model/FieldRef'
 import { ArgumentsRenderingTree, buildArgumentsRenderingTree } from './ArgumentsRenderingTree'
+import { ObjectValue } from './ObjectValue'
 
 function printTree(tree: ArgumentsRenderingTree) {
   const writer = new Writer(0, { chalk: new chalk.Instance({ level: 0 }) })
@@ -249,7 +250,7 @@ test('error in nested selection', () => {
     },
   })
 
-  tree.arguments.getDeepSelectionValue(['field1', 'field2', 'field3'])?.getField('arg')?.markAsError()
+  ;(tree.arguments.getDeepSelectionValue(['field1', 'field2', 'field3']) as ObjectValue).getField('arg')?.markAsError()
 
   expect(printTree(tree)).toMatchInlineSnapshot(`
     {

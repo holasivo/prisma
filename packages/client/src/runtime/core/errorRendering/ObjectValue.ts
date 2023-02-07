@@ -9,6 +9,11 @@ const fieldsSeparator: ErrorBasicBuilder = {
   },
 }
 
+type SelectionParent = {
+  kind: 'include' | 'select'
+  value: ObjectValue
+}
+
 export class ObjectValue implements ErrorBasicBuilder {
   private fields: Record<string, ObjectField> = {}
   private suggestions: ObjectFieldSuggestion[] = []
@@ -23,6 +28,18 @@ export class ObjectValue implements ErrorBasicBuilder {
 
   getField(key: string): ObjectField | undefined {
     return this.fields[key]
+  }
+
+  hasField(key: string) {
+    return Boolean(this.getField(key))
+  }
+
+  removeAllFields() {
+    this.fields = {}
+  }
+
+  isEmpty(): boolean {
+    return Object.keys(this.fields).length === 0
   }
 
   getFieldValue(key: string): Value | undefined {
@@ -47,7 +64,7 @@ export class ObjectValue implements ErrorBasicBuilder {
     return selection
   }
 
-  getDeepSelectionParent(path: string[]): ObjectValue | undefined {
+  getDeepSelectionParent(path: string[]): SelectionParent | undefined {
     const thisParent = this.getSelectionParent()
     if (!thisParent) {
       return undefined
@@ -56,7 +73,7 @@ export class ObjectValue implements ErrorBasicBuilder {
     let parent = thisParent
 
     for (const segment of path) {
-      const next = parent.getFieldValue(segment)
+      const next = parent.value.getFieldValue(segment)
       if (!next || !(next instanceof ObjectValue)) {
         return undefined
       }
@@ -71,26 +88,26 @@ export class ObjectValue implements ErrorBasicBuilder {
     return parent
   }
 
-  getSelectionParent(): ObjectValue | undefined {
+  getSelectionParent(): SelectionParent | undefined {
     const select = this.getField('select')
     if (select?.value instanceof ObjectValue) {
-      return select.value
+      return { kind: 'select', value: select.value }
     }
 
     const include = this.getField('include')
     if (include?.value instanceof ObjectValue) {
-      return include.value
+      return { kind: 'include', value: include.value }
     }
     return undefined
   }
 
   getSelectionValue(key: string): Value | undefined {
-    return this.getSelectionParent()?.fields[key].value
+    return this.getSelectionParent()?.value.fields[key].value
   }
 
   write(writer: ErrorWriter): void {
     const fields = Object.values(this.fields)
-    if (fields.length === 0) {
+    if (fields.length === 0 && this.suggestions.length === 0) {
       writer.write('{}')
       return
     }

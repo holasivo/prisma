@@ -4,6 +4,7 @@ import {
   JsonQuery,
   JsonQueryAction,
   JsonSelectionSet,
+  OutputTypeDescription,
 } from '@prisma/engine-core'
 import { DMMF } from '@prisma/generator-helper'
 import { assertNever } from '@prisma/internals'
@@ -18,7 +19,7 @@ import { MergedExtensionsList } from '../../extensions/MergedExtensionsList'
 import { applyComputedFieldsToSelection } from '../../extensions/resultUtils'
 import { isFieldRef } from '../../model/FieldRef'
 import { Action, JsArgs, JsInputValue, RawParameters, Selection } from '../../types/JsApi'
-import { OutputTypeDescription, ValidationError } from '../../types/ValidationError'
+import { ValidationError } from '../../types/ValidationError'
 
 const jsActionToProtocolAction: Record<Action, JsonQueryAction> = {
   findUnique: 'findUnique',

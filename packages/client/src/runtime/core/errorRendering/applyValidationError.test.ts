@@ -6,18 +6,31 @@ import { ValidationError } from '../types/ValidationError'
 import { applyValidationError } from './applyValidationError'
 import { buildArgumentsRenderingTree } from './ArgumentsRenderingTree'
 
-const renderArguments = (error: ValidationError, args: JsArgs) => {
+const renderError = (error: ValidationError, args: JsArgs) => {
   const argsTree = buildArgumentsRenderingTree(args)
   applyValidationError(error, argsTree)
 
-  const context = { chalk: new chalk.Instance({ level: 0 }) }
-  return new Writer(0, context).write(argsTree).toString()
+  const disabledChalk = new chalk.Instance({ level: 0 })
+  const context = { chalk: disabledChalk }
+  const argsStr = new Writer(0, context).write(argsTree).toString()
+  const message = argsTree.renderAllMessages(disabledChalk)
+
+  return `${argsStr}\n\n${message}`
+}
+
+const PostDescription = {
+  name: 'Post',
+  fields: [
+    { name: 'id', typeName: 'string', isRelation: false },
+    { name: 'title', typeName: 'string', isRelation: false },
+    { name: 'comments', typeName: 'Comment', isRelation: true },
+  ],
 }
 
 describe('includeAndSelect', () => {
   test('top level', () => {
     expect(
-      renderArguments(
+      renderError(
         { kind: 'includeAndSelect', selectionPath: [] },
         {
           data: { foo: 'bar' },
@@ -35,12 +48,14 @@ describe('includeAndSelect', () => {
         select: {}
         ~~~~~~
       }
+
+      Please either use \`include\` or \`select\`, but not both at the same time.
     `)
   })
 
   test('deep', () => {
     expect(
-      renderArguments(
+      renderError(
         { kind: 'includeAndSelect', selectionPath: ['posts', 'likes'] },
         {
           include: {
@@ -74,6 +89,8 @@ describe('includeAndSelect', () => {
           }
         }
       }
+
+      Please either use \`include\` or \`select\`, but not both at the same time.
     `)
   })
 })
@@ -81,7 +98,7 @@ describe('includeAndSelect', () => {
 describe('includeOnScalar', () => {
   test('top level - no type description', () => {
     expect(
-      renderArguments(
+      renderError(
         { kind: 'includeOnScalar', selectionPath: ['id'], meta: {} },
         {
           data: { foo: 'bar' },
@@ -100,12 +117,15 @@ describe('includeOnScalar', () => {
           ~~
         }
       }
+
+      Invalid scalar field \`id\` for include statement.
+      Note, that include statements only accept relation fields.
     `)
   })
 
   test('top level - with type descriptions', () => {
     expect(
-      renderArguments(
+      renderError(
         {
           kind: 'includeOnScalar',
           selectionPath: ['id'],
@@ -135,15 +155,18 @@ describe('includeOnScalar', () => {
         include: {
           id: true,
           ~~
-      ?   posts: true
+      ?   posts?: true
         }
       }
+
+      Invalid scalar field \`id\` for include statement on model User. Available options are listed in green.
+      Note, that include statements only accept relation fields.
     `)
   })
 
   test('nested - no type description', () => {
     expect(
-      renderArguments(
+      renderError(
         { kind: 'includeOnScalar', selectionPath: ['posts', 'id'], meta: {} },
         {
           data: { foo: 'bar' },
@@ -170,12 +193,15 @@ describe('includeOnScalar', () => {
           }
         }
       }
+
+      Invalid scalar field \`id\` for include statement.
+      Note, that include statements only accept relation fields.
     `)
   })
 
   test('nested - with type descriptions', () => {
     expect(
-      renderArguments(
+      renderError(
         {
           kind: 'includeOnScalar',
           selectionPath: ['posts', 'id'],
@@ -211,11 +237,231 @@ describe('includeOnScalar', () => {
             include: {
               id: true,
               ~~
-      ?       likes: true
+      ?       likes?: true
             }
           }
         }
       }
+
+      Invalid scalar field \`id\` for include statement on model Post. Available options are listed in green.
+      Note, that include statements only accept relation fields.
+    `)
+  })
+})
+
+describe('EmptySelection', () => {
+  test('top level', () => {
+    expect(
+      renderError(
+        {
+          kind: 'EmptySelection',
+          selectionPath: [],
+          meta: {
+            outputType: PostDescription,
+          },
+        },
+        { where: { published: true }, select: {} },
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        where: {
+          published: true
+        },
+        select: {
+      ?   id?: true,
+      ?   title?: true,
+      ?   comments?: true
+        }
+      }
+
+      The \`select\` statement for type Post must not be empty. Available options are listed in green.
+    `)
+  })
+
+  test('top level with falsy values', () => {
+    expect(
+      renderError(
+        {
+          kind: 'EmptySelection',
+          selectionPath: [],
+          meta: {
+            outputType: PostDescription,
+          },
+        },
+        { where: { published: true }, select: { id: false } },
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        where: {
+          published: true
+        },
+        select: {
+      ?   id?: true,
+      ?   title?: true,
+      ?   comments?: true
+        }
+      }
+
+      The \`select\` statement for type Post needs at least one truthy value.
+    `)
+  })
+
+  test('nested', () => {
+    expect(
+      renderError(
+        {
+          kind: 'EmptySelection',
+          selectionPath: ['users', 'posts'],
+          meta: {
+            outputType: PostDescription,
+          },
+        },
+        { select: { users: { include: { posts: { select: {} } } } } },
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        select: {
+          users: {
+            include: {
+              posts: {
+                select: {
+      ?           id?: true,
+      ?           title?: true,
+      ?           comments?: true
+                }
+              }
+            }
+          }
+        }
+      }
+
+      The \`select\` statement for type Post must not be empty. Available options are listed in green.
+    `)
+  })
+})
+
+describe('UnknownSelectionField', () => {
+  test('top level select', () => {
+    expect(
+      renderError(
+        {
+          kind: 'UnknownSelectionField',
+          selectionPath: ['notThere'],
+          meta: {
+            outputType: PostDescription,
+          },
+        },
+        { select: { notThere: true } },
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        select: {
+          notThere: true,
+          ~~~~~~~~
+      ?   id?: true,
+      ?   title?: true,
+      ?   comments?: true
+        }
+      }
+
+      Unknown field \`notThere\` for select statement on model Post. Available options are listed in green.
+    `)
+  })
+
+  test('top level include', () => {
+    expect(
+      renderError(
+        {
+          kind: 'UnknownSelectionField',
+          selectionPath: ['notThere'],
+          meta: {
+            outputType: PostDescription,
+          },
+        },
+        { include: { notThere: true } },
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        include: {
+          notThere: true,
+          ~~~~~~~~
+      ?   id?: true,
+      ?   title?: true,
+      ?   comments?: true
+        }
+      }
+
+      Unknown field \`notThere\` for include statement on model Post. Available options are listed in green.
+    `)
+  })
+
+  test('nested select', () => {
+    expect(
+      renderError(
+        {
+          kind: 'UnknownSelectionField',
+          selectionPath: ['users', 'posts', 'notThere'],
+          meta: {
+            outputType: PostDescription,
+          },
+        },
+        { select: { users: { select: { posts: { select: { notThere: true } } } } } },
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        select: {
+          users: {
+            select: {
+              posts: {
+                select: {
+                  notThere: true,
+                  ~~~~~~~~
+      ?           id?: true,
+      ?           title?: true,
+      ?           comments?: true
+                }
+              }
+            }
+          }
+        }
+      }
+
+      Unknown field \`notThere\` for select statement on model Post. Available options are listed in green.
+    `)
+  })
+
+  test('nested level include', () => {
+    expect(
+      renderError(
+        {
+          kind: 'UnknownSelectionField',
+          selectionPath: ['users', 'posts', 'notThere'],
+          meta: {
+            outputType: PostDescription,
+          },
+        },
+        { select: { users: { include: { posts: { include: { notThere: true } } } } } },
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        select: {
+          users: {
+            include: {
+              posts: {
+                include: {
+                  notThere: true,
+                  ~~~~~~~~
+      ?           id?: true,
+      ?           title?: true,
+      ?           comments?: true
+                }
+              }
+            }
+          }
+        }
+      }
+
+      Unknown field \`notThere\` for include statement on model Post. Available options are listed in green.
     `)
   })
 })

@@ -5,6 +5,6 @@ export class ObjectFieldSuggestion implements ErrorBasicBuilder {
 
   write(writer: ErrorWriter): void {
     const { chalk } = writer.context
-    writer.addMarginSymbol(chalk.greenBright('?')).write(chalk.greenBright(`${this.name}: ${this.value}`))
+    writer.addMarginSymbol(chalk.greenBright('?')).write(chalk.greenBright(`${this.name}?: ${this.value}`))
   }
 }
