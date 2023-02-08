@@ -1,4 +1,9 @@
-import { EmptySelectionError, OutputTypeDescription, UnknownSelectionFieldError } from '@prisma/engine-core'
+import {
+  EmptySelectionError,
+  OutputTypeDescription,
+  UnknownArgumentError,
+  UnknownSelectionFieldError,
+} from '@prisma/engine-core'
 import chalk from 'chalk'
 
 import { IncludeAndSelectError, IncludeOnScalarError, ValidationError } from '../types/ValidationError'
@@ -19,6 +24,9 @@ export function applyValidationError(error: ValidationError, args: ArgumentsRend
       break
     case 'UnknownSelectionField':
       applyUnknownSelectionFieldError(error, args)
+      break
+    case 'UnknownArgument':
+      applyUnknownArgumentError(error, args)
       break
     default:
       throw new Error('not implemented')
@@ -110,6 +118,10 @@ function applyUnknownSelectionFieldError(error: UnknownSelectionFieldError, args
     parts.push(availableOptionsMessage(chalk))
     return parts.join(' ')
   })
+}
+
+function applyUnknownArgumentError(error: UnknownArgumentError, argsTree: ArgumentsRenderingTree) {
+  argsTree.arguments.getDeepField(error.argumentPath)?.markAsError()
 }
 
 function addSelectionSuggestions(selection: ObjectValue, outputType: OutputTypeDescription) {

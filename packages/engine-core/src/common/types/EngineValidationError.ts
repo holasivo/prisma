@@ -30,7 +30,7 @@ export type UnknownArgumentError = {
   selectionPath: string[]
   argumentPath: string[]
   meta: {
-    arguments: ArgumentsDescription
+    arguments: ArgumentDescription[]
   }
 }
 
@@ -63,10 +63,6 @@ export type InputTypeDescriptionField = {
   name: string
   typeNames: string[]
   required: boolean
-}
-
-export type ArgumentsDescription = {
-  args: ArgumentDescription[]
 }
 
 export type ArgumentDescription = {

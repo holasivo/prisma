@@ -18,7 +18,7 @@ const renderError = (error: ValidationError, args: JsArgs) => {
   return `${argsStr}\n\n${message}`
 }
 
-const PostDescription = {
+const PostOutputDescription = {
   name: 'Post',
   fields: [
     { name: 'id', typeName: 'string', isRelation: false },
@@ -257,7 +257,7 @@ describe('EmptySelection', () => {
           kind: 'EmptySelection',
           selectionPath: [],
           meta: {
-            outputType: PostDescription,
+            outputType: PostOutputDescription,
           },
         },
         { where: { published: true }, select: {} },
@@ -285,7 +285,7 @@ describe('EmptySelection', () => {
           kind: 'EmptySelection',
           selectionPath: [],
           meta: {
-            outputType: PostDescription,
+            outputType: PostOutputDescription,
           },
         },
         { where: { published: true }, select: { id: false } },
@@ -313,7 +313,7 @@ describe('EmptySelection', () => {
           kind: 'EmptySelection',
           selectionPath: ['users', 'posts'],
           meta: {
-            outputType: PostDescription,
+            outputType: PostOutputDescription,
           },
         },
         { select: { users: { include: { posts: { select: {} } } } } },
@@ -348,7 +348,7 @@ describe('UnknownSelectionField', () => {
           kind: 'UnknownSelectionField',
           selectionPath: ['notThere'],
           meta: {
-            outputType: PostDescription,
+            outputType: PostOutputDescription,
           },
         },
         { select: { notThere: true } },
@@ -375,7 +375,7 @@ describe('UnknownSelectionField', () => {
           kind: 'UnknownSelectionField',
           selectionPath: ['notThere'],
           meta: {
-            outputType: PostDescription,
+            outputType: PostOutputDescription,
           },
         },
         { include: { notThere: true } },
@@ -402,7 +402,7 @@ describe('UnknownSelectionField', () => {
           kind: 'UnknownSelectionField',
           selectionPath: ['users', 'posts', 'notThere'],
           meta: {
-            outputType: PostDescription,
+            outputType: PostOutputDescription,
           },
         },
         { select: { users: { select: { posts: { select: { notThere: true } } } } } },
@@ -437,7 +437,7 @@ describe('UnknownSelectionField', () => {
           kind: 'UnknownSelectionField',
           selectionPath: ['users', 'posts', 'notThere'],
           meta: {
-            outputType: PostDescription,
+            outputType: PostOutputDescription,
           },
         },
         { select: { users: { include: { posts: { include: { notThere: true } } } } } },
@@ -462,6 +462,35 @@ describe('UnknownSelectionField', () => {
       }
 
       Unknown field \`notThere\` for include statement on model Post. Available options are listed in green.
+    `)
+  })
+})
+
+describe('UnknownArgument', () => {
+  test('top level', () => {
+    expect(
+      renderError(
+        {
+          kind: 'UnknownArgument',
+          selectionPath: [],
+          argumentPath: ['notValid'],
+          meta: {
+            arguments: [
+              { name: 'where', typeNames: ['PostWhereInput'] },
+              { name: 'orderBy', typeNames: ['PostOrderByWithRelationInput', 'List<PostOrderByWithRelationInput>'] },
+              { name: 'take', typeNames: ['Int'] },
+            ],
+          },
+        },
+        { notValid: 123 },
+      ),
+    ).toMatchInlineSnapshot(`
+      {
+        notValid: 123
+        ~~~~~~~~
+      }
+
+
     `)
   })
 })

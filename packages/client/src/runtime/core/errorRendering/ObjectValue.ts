@@ -30,6 +30,26 @@ export class ObjectValue implements ErrorBasicBuilder {
     return this.fields[key]
   }
 
+  getDeepField(path: string[]): ObjectField | undefined {
+    const [head, ...tail] = path
+    const firstField = this.getField(head)
+    if (!firstField) {
+      return undefined
+    }
+    let field = firstField
+    for (const segment of tail) {
+      if (!(field.value instanceof ObjectValue)) {
+        return undefined
+      }
+      const nextField = field.value.getField(segment)
+      if (!nextField) {
+        return undefined
+      }
+      field = nextField
+    }
+    return field
+  }
+
   hasField(key: string) {
     return Boolean(this.getField(key))
   }
