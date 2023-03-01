@@ -420,7 +420,7 @@ importers:
       new-github-issue-url: 0.2.1
       p-retry: 4.6.2
       strip-ansi: 6.0.1
-      ts-pattern: 4.1.3
+      ts-pattern: 4.2.1
       typescript: 4.9.5
       undici: 5.16.0
     dependencies:
@@ -437,7 +437,7 @@ importers:
       new-github-issue-url: 0.2.1
       p-retry: 4.6.2
       strip-ansi: 6.0.1
-      ts-pattern: 4.1.3
+      ts-pattern: 4.2.1
       undici: 5.16.0
     devDependencies:
       '@swc/core': 1.3.32
@@ -586,7 +586,7 @@ importers:
       strip-ansi: 6.0.1
       tempy: 1.0.1
       terminal-link: 2.1.1
-      ts-pattern: 4.1.3
+      ts-pattern: 4.2.1
       typescript: 4.9.5
     dependencies:
       '@prisma/debug': link:../debug
@@ -598,7 +598,7 @@ importers:
       strip-ansi: 6.0.1
       tempy: 1.0.1
       terminal-link: 2.1.1
-      ts-pattern: 4.1.3
+      ts-pattern: 4.2.1
     devDependencies:
       '@swc/core': 1.3.32
       '@swc/jest': 0.2.24_@swc+core@1.3.32
@@ -827,7 +827,7 @@ importers:
       jest: 29.4.1
       jest-junit: 15.0.0
       log-update: 4.0.0
-      mariadb: 3.0.2
+      mariadb: 3.1.0
       mock-stdin: 1.0.0
       mongoose: ^6.5.0
       mssql: 9.1.1
@@ -849,7 +849,7 @@ importers:
       has-yarn: 2.1.0
       indent-string: 4.0.0
       log-update: 4.0.0
-      mariadb: 3.0.2
+      mariadb: 3.1.0
       mongoose: 6.7.0
       mssql: 9.1.1
       pg: 8.9.0
@@ -9822,6 +9822,18 @@ packages:
       iconv-lite: 0.6.3
       lru-cache: 7.14.0
       moment-timezone: 0.5.38
+    dev: true
+
+  /mariadb/3.1.0:
+    resolution: {integrity: sha512-OyWbm90bX6gsEuJjD8rLrkBXYt3BR/xc6mQfFibZmmzSw938S5EZzullW5gbVZKRZwbZGxihfszxjCETWid45Q==}
+    engines: {node: '>= 12'}
+    dependencies:
+      '@types/geojson': 7946.0.10
+      '@types/node': 17.0.45
+      denque: 2.1.0
+      iconv-lite: 0.6.3
+      lru-cache: 7.14.0
+    dev: false
 
   /matcher/3.0.0:
     resolution: {integrity: sha512-OkeDaAZ/bQCxeFAozM55PKcKU0yJMPGifLwV4Qgjitu+5MoAfSQN4lsLJeXZ1b8w0x+/Emda6MZgXS1jvsapng==}
@@ -10153,9 +10165,11 @@ packages:
     resolution: {integrity: sha512-nMIrzGah4+oYZPflDvLZUgoVUO4fvAqHstvG3xAUnMolWncuAiLDWNnJZj6EwJGMGfb1ZcuTFE6GI3hNOVWI/Q==}
     dependencies:
       moment: 2.29.4
+    dev: true
 
   /moment/2.29.4:
     resolution: {integrity: sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==}
+    dev: true
 
   /mongodb-connection-string-url/2.5.4:
     resolution: {integrity: sha512-SeAxuWs0ez3iI3vvmLk/j2y+zHwigTDKQhtdxTgt5ZCOQQS5+HW4g45/Xw5vzzbn7oQXCNQ24Z40AkJsizEy7w==}
@@ -12821,6 +12835,11 @@ packages:
 
   /ts-pattern/4.1.3:
     resolution: {integrity: sha512-8beXMWTGEv1JfDjSxfNhe4uT5jKYdhmEUKzt4gZW9dmHlquq3b+IbEyA7vX9LjBfzHmvKnM4HiomAUCyaW2Pew==}
+    dev: true
+
+  /ts-pattern/4.2.1:
+    resolution: {integrity: sha512-lXCmHZb01QOM9HdCLvisCGUH9ATdKPON9UaUvwe007gJAhuSBhRWIAIowys5QqNxEq6odWctfMIdI96vzjnOMQ==}
+    dev: false
 
   /ts-toolbelt/9.6.0:
     resolution: {integrity: sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==}
