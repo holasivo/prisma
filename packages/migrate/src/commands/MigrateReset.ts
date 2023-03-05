@@ -89,8 +89,8 @@ ${chalk.bold('Examples')}
     loadEnvFile(args['--schema'], true)
 
     const schemaPath = await getSchemaPathAndPrint(args['--schema'])
-
-    printDatasource({ datasourceInfo: await getDatasourceInfo({ schemaPath }) })
+    const datasourceInfo = await getDatasourceInfo({ schemaPath })
+    printDatasource({ datasourceInfo })
 
     throwUpgradeErrorIfOldMigrate(schemaPath)
 
@@ -118,6 +118,11 @@ ${chalk.bold('Examples')}
       if (!confirmation.value) {
         console.info('Reset cancelled.')
         // Return SIGINT exit code to signal that the process was cancelled
+        process.exit(130)
+      }
+
+      if (!/localhost/gi.test(datasourceInfo.dbLocation!)) {
+        console.info(`Reset cancelled: ${datasourceInfo.dbLocation} is a remote database`)
         process.exit(130)
       }
     }

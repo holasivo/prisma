@@ -246,6 +246,11 @@ ${chalk.bold('Examples')}
           // Return SIGINT exit code to signal that the process was cancelled.
           process.exit(130)
         }
+
+        if (!/localhost/gi.test(datasourceInfo.dbLocation!)) {
+          console.info(`Reset cancelled: ${datasourceInfo.dbLocation} is a remote database`)
+          process.exit(130)
+        }
       }
     }
 
